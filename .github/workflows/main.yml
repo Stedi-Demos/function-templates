@@ -5,9 +5,9 @@ on:
 jobs:
   assign_one_project:
     runs-on: ubuntu-latest
-    name: Assign to Customer Ops Project
+    name: Assign to Function Templates project
     steps:
-    - name: Assign new issues to Customer Ops project
+    - name: Assign new issues to Function Templates project
       uses: actions/add-to-project@960fbad431afda394cfcf8743445e741acd19e85 # v0.4.0
       if: github.event.action == 'opened'
       with:
