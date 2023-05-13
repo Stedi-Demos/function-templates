@@ -1,7 +1,7 @@
 import test from "ava";
 import { mock } from "node:test";
 import { handler } from "../handler.js";
-import { sampleFileFailedEvent } from "../../../shared/testing/fixtures/event-file-failed.js";
+import { sampleFileFailedEvent } from "@stedi/idk/testing";
 
 const event = sampleFileFailedEvent();
 

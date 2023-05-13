@@ -1,7 +1,9 @@
 import test from "ava";
 import { handler } from "../handler.js";
-import { sampleTransactionProcessedEvent } from "../../../shared/testing/fixtures/event-transaction-processed.js";
-import { mockS3Client } from "../../../shared/testing/mock-clients.js";
+import {
+  sampleTransactionProcessedEvent,
+  mockS3Client,
+} from "@stedi/idk/testing";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "node:stream";
 import { sdkStreamMixin } from "@aws-sdk/util-stream-node";
