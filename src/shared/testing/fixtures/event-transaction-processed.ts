@@ -1,4 +1,4 @@
-import { TransactionProcessed } from "../../schemas/event-transaction-processed.js";
+import { type TransactionProcessed } from "@stedi/idk";
 
 export const sampleTransactionProcessedEvent = (): TransactionProcessed => ({
   id: "xxx-05d4-b198-2fde-7ededc63b103",

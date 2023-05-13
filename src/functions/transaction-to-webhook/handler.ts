@@ -1,5 +1,5 @@
 import s3 from "@aws-sdk/client-s3";
-import { TransactionProcessed } from "../../shared/schemas/event-transaction-processed.js";
+import { type TransactionProcessed } from "@stedi/idk";
 
 export const handler = async (event: TransactionProcessed) => {
   // get bucket reference for the JSON version of EDI Transaction Set

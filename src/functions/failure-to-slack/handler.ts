@@ -1,4 +1,4 @@
-import { FileFailed } from "../../shared/schemas/event-file-failed.js";
+import { type FileFailed } from "@stedi/idk";
 
 export const handler = async (event: FileFailed) => {
   const {

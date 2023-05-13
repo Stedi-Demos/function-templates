@@ -10,7 +10,7 @@ The repo contains Typescript functions, so they must be compiled before using as
 npx tsc
 ```
 
-You can list the available templates with:
+You can list the available templates wit:
 
 ```bash
 ls ./dist/functions/**/handler.js

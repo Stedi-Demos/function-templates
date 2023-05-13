@@ -34,7 +34,7 @@ test("delivers EDI as JSON to webhook url", async (t) => {
     global,
     // @ts-expect-error fetch is not yet present in @types/node
     "fetch",
-    (_input: RequestInfo, init?: RequestInit): Promise<Response> => {
+    (_input: RequestInfo, init: RequestInit): Promise<Response> => {
       t.assert(
         init?.body === JSON.stringify(sampleEDIAsJSON),
         "JSON payload was delivered to webhook"

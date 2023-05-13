@@ -1,4 +1,4 @@
-import { FileFailed } from "../../schemas/event-file-failed.js";
+import { type FileFailed } from "@stedi/idk";
 
 export const sampleFileFailedEvent = (): FileFailed => ({
   version: "0",
