@@ -1,10 +1,10 @@
 import test from "ava";
 import { handler } from "../handler.js";
 import {
+  mockClient,
   sampleTransactionProcessedEvent,
-  mockS3Client,
 } from "@stedi/idk/testing";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Readable } from "node:stream";
 import { sdkStreamMixin } from "@aws-sdk/util-stream-node";
 import { mock } from "node:test";
@@ -12,7 +12,7 @@ import { mock } from "node:test";
 const event = sampleTransactionProcessedEvent();
 
 const sampleEDIAsJSON = { heading: { test: 1 } };
-const buckets = mockS3Client();
+const buckets = mockClient(S3Client);
 
 test.before(() => {
   buckets
