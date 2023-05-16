@@ -3,7 +3,7 @@ import { handler } from "../handler.js";
 import {
   mockClient,
   sampleTransactionProcessedEvent,
-} from "@stedi/idk/testing";
+} from "@stedi/integrations-sdk/testing";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Readable } from "node:stream";
 import { sdkStreamMixin } from "@aws-sdk/util-stream-node";

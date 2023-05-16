@@ -1,7 +1,7 @@
 import test from "ava";
 import { mock } from "node:test";
 import { handler } from "../handler.js";
-import { sampleFileFailedEvent } from "@stedi/idk/testing";
+import { sampleFileFailedEvent } from "@stedi/integrations-sdk/testing";
 
 const event = sampleFileFailedEvent();
 

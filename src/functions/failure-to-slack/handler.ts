@@ -1,4 +1,4 @@
-import { type FileFailed } from "@stedi/idk";
+import { type FileFailed } from "@stedi/integrations-sdk";
 
 export const handler = async (event: FileFailed) => {
   const {

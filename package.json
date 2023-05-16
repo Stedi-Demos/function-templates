@@ -14,7 +14,7 @@
     "@ava/typescript": "^4.0.0",
     "@aws-sdk/client-s3": "^3.272.0",
     "@aws-sdk/util-stream-node": "^3.272.0",
-    "@stedi/idk": "file:../../stedi-idk",
+    "@stedi/integrations-sdk": "file:../../integrations-sdk",
     "@stedi/sdk-client-buckets": "^0.1.49",
     "@stedi/sdk-client-edi-translate": "^0.1.49",
     "@stedi/sdk-client-guides": "^0.1.49",
