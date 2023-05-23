@@ -1,23 +1,24 @@
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { type TransactionProcessed } from "@stedi/integrations-sdk";
+import { type CoreTransactionProcessedEvent } from "@stedi/integrations-sdk";
+import { bucketsClient } from "@stedi/integrations-sdk/clients";
+import { GetObjectCommand } from "@stedi/sdk-client-buckets";
 
-export const handler = async (event: TransactionProcessed) => {
+export const handler = async (event: CoreTransactionProcessedEvent) => {
   // get bucket reference for the JSON version of EDI Transaction Set
   const {
     detail: { output },
   } = event;
 
   // retrieve the file contents using bucket reference
-  const client = new S3Client({});
+  const client = bucketsClient();
   const getFile = await client.send(
-    new GetObjectCommand({ Bucket: output.bucketName, Key: output.key })
+    new GetObjectCommand({ bucketName: output.bucketName, key: output.key })
   );
 
-  if (getFile.Body === undefined) {
+  if (getFile.body === undefined) {
     throw new Error("Failed to retrieve file from Bucket");
   }
 
-  const body = await getFile.Body.transformToString();
+  const body = await getFile.body.transformToString();
 
   if (process.env.WEBHOOK_URL === undefined) {
     throw new Error("WEBHOOK_URL is not defined");

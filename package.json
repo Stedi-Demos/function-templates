@@ -14,7 +14,7 @@
     "@ava/typescript": "^4.0.0",
     "@aws-sdk/client-s3": "^3.272.0",
     "@aws-sdk/util-stream-node": "^3.272.0",
-    "@stedi/integrations-sdk": "^0.1.7",
+    "@stedi/integrations-sdk": "^0.1.8",
     "@stedi/sdk-client-buckets": "^0.1.49",
     "@stedi/sdk-client-edi-translate": "^0.1.49",
     "@stedi/sdk-client-guides": "^0.1.49",
@@ -27,6 +27,7 @@
     "ava": "^5.2.0",
     "aws-sdk-client-mock": "^2.1.1",
     "c8": "^7.13.0",
+    "dotenv": "^16.0.3",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "ts-node": "^10.9.1",
@@ -39,7 +40,6 @@
   },
   "ava": {
     "environmentVariables": {
-      "STEDI_FUNCTION_NAME": "function-under-test",
       "WEBHOOK_URL": "https://www.company.com/test-webhook",
       "SLACK_URL": "https://hooks.slack.com/services/ABC123/DEF456/GHI789"
     },

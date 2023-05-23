@@ -4,7 +4,7 @@ import {
   mockClient,
   sampleTransactionProcessedEvent,
 } from "@stedi/integrations-sdk/testing";
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { BucketsClient, GetObjectCommand } from "@stedi/sdk-client-buckets";
 import { Readable } from "node:stream";
 import { sdkStreamMixin } from "@aws-sdk/util-stream-node";
 import { mock } from "node:test";
@@ -12,7 +12,7 @@ import { mock } from "node:test";
 const event = sampleTransactionProcessedEvent();
 
 const sampleEDIAsJSON = { heading: { test: 1 } };
-const buckets = mockClient(S3Client);
+const buckets = mockClient(BucketsClient);
 
 test.afterEach(() => {
   buckets.reset();
@@ -22,11 +22,11 @@ test.afterEach(() => {
 test.serial("delivers EDI as JSON to webhook url", async (t) => {
   buckets
     .on(GetObjectCommand, {
-      Bucket: event.detail.output.bucketName,
-      Key: event.detail.output.key,
+      bucketName: event.detail.output.bucketName,
+      key: event.detail.output.key,
     })
     .resolvesOnce({
-      Body: sdkStreamMixin(
+      body: sdkStreamMixin(
         Readable.from([
           new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
         ])
@@ -70,11 +70,11 @@ test.serial(
 
     buckets
       .on(GetObjectCommand, {
-        Bucket: event.detail.output.bucketName,
-        Key: event.detail.output.key,
+        bucketName: event.detail.output.bucketName,
+        key: event.detail.output.key,
       })
       .resolvesOnce({
-        Body: sdkStreamMixin(
+        body: sdkStreamMixin(
           Readable.from([
             new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
           ])
@@ -115,11 +115,11 @@ test.serial(
 test.serial("throws if JSON file body is empty", async (t) => {
   buckets
     .on(GetObjectCommand, {
-      Bucket: event.detail.output.bucketName,
-      Key: event.detail.output.key,
+      bucketName: event.detail.output.bucketName,
+      key: event.detail.output.key,
     })
     .resolvesOnce({
-      Body: undefined,
+      body: undefined,
     });
 
   mock.method(
