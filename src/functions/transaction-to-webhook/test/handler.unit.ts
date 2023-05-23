@@ -21,17 +21,17 @@ test.afterEach(() => {
 
 test.serial("delivers EDI as JSON to webhook url", async (t) => {
   buckets
-  .on(GetObjectCommand, {
-    Bucket: event.detail.output.bucketName,
-    Key: event.detail.output.key,
-  })
-  .resolvesOnce({
-    Body: sdkStreamMixin(
-      Readable.from([
-        new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
-      ])
-    ),
-  });
+    .on(GetObjectCommand, {
+      Bucket: event.detail.output.bucketName,
+      Key: event.detail.output.key,
+    })
+    .resolvesOnce({
+      Body: sdkStreamMixin(
+        Readable.from([
+          new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
+        ])
+      ),
+    });
 
   mock.method(
     global,
@@ -39,14 +39,12 @@ test.serial("delivers EDI as JSON to webhook url", async (t) => {
     "fetch",
     (_input: RequestInfo, init: RequestInit): Promise<Response> => {
       t.assert(
-        init?.body === JSON.stringify(sampleEDIAsJSON),
+        init.body === JSON.stringify(sampleEDIAsJSON),
         "JSON payload was delivered to webhook"
       );
-      t.deepEqual(
-        init?.headers, {
-          "Content-Type": "application/json",
-        }
-      );
+      t.deepEqual(init.headers, {
+        "Content-Type": "application/json",
+      });
       return Promise.resolve({ ok: true, status: 201 } as Response);
     }
   );
@@ -64,64 +62,65 @@ test.serial("delivers EDI as JSON to webhook url", async (t) => {
   });
 });
 
-test.serial("delivers EDI as JSON to authenticated webhook url when env var is set", async (t) => {
-  // add AUTHENTICATION env var for this test
-  process.env["AUTHORIZATION"] = "my-auth-key";
+test.serial(
+  "delivers EDI as JSON to authenticated webhook url when env var is set",
+  async (t) => {
+    // add AUTHENTICATION env var for this test
+    process.env.AUTHORIZATION = "my-auth-key";
 
-  buckets
-  .on(GetObjectCommand, {
-    Bucket: event.detail.output.bucketName,
-    Key: event.detail.output.key,
-  })
-  .resolvesOnce({
-    Body: sdkStreamMixin(
-      Readable.from([
-        new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
-      ])
-    ),
-  });
+    buckets
+      .on(GetObjectCommand, {
+        Bucket: event.detail.output.bucketName,
+        Key: event.detail.output.key,
+      })
+      .resolvesOnce({
+        Body: sdkStreamMixin(
+          Readable.from([
+            new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
+          ])
+        ),
+      });
 
-  mock.method(
-    global,
-    // @ts-expect-error fetch is not yet present in @types/node
-    "fetch",
-    (_input: RequestInfo, init: RequestInit): Promise<Response> => {
-      t.assert(
-        init?.body === JSON.stringify(sampleEDIAsJSON),
-        "JSON payload was delivered to webhook"
-      );
-      t.deepEqual(
-        init?.headers, {
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (_input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(
+          init.body === JSON.stringify(sampleEDIAsJSON),
+          "JSON payload was delivered to webhook"
+        );
+        t.deepEqual(init.headers, {
           "Content-Type": "application/json",
           Authorization: "my-auth-key",
-        }
-      );
-      return Promise.resolve({ ok: true, status: 201 } as Response);
-    }
-  );
+        });
+        return Promise.resolve({ ok: true, status: 201 } as Response);
+      }
+    );
 
-  const result = await handler(event);
+    const result = await handler(event);
 
-  // @ts-expect-error fetch is not yet present in @types/node
-  const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
+    // @ts-expect-error fetch is not yet present in @types/node
+    const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
 
-  t.assert(calls.length === 1, "JSON payload was delivered to webhook");
+    t.assert(calls.length === 1, "JSON payload was delivered to webhook");
 
-  t.deepEqual(result, {
-    ok: true,
-    statusCode: 201,
-  });
-});
+    t.deepEqual(result, {
+      ok: true,
+      statusCode: 201,
+    });
+  }
+);
 
 test.serial("throws if JSON file body is empty", async (t) => {
   buckets
-  .on(GetObjectCommand, {
-    Bucket: event.detail.output.bucketName,
-    Key: event.detail.output.key,
-  })
-  .resolvesOnce({
-    Body: undefined
-  });
+    .on(GetObjectCommand, {
+      Bucket: event.detail.output.bucketName,
+      Key: event.detail.output.key,
+    })
+    .resolvesOnce({
+      Body: undefined,
+    });
 
   mock.method(
     global,

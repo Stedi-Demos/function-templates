@@ -14,14 +14,12 @@ test("delivers event to webhook url", async (t) => {
     "fetch",
     (_input: RequestInfo, init: RequestInit): Promise<Response> => {
       t.assert(
-        init?.body === JSON.stringify(event),
+        init.body === JSON.stringify(event),
         "event was delivered to webhook"
       );
-      t.deepEqual(
-        init?.headers, {
-          "Content-Type": "application/json",
-        }
-      );
+      t.deepEqual(init.headers, {
+        "Content-Type": "application/json",
+      });
       return Promise.resolve({ ok: true, status: 200 } as Response);
     }
   );
@@ -41,7 +39,7 @@ test("delivers event to webhook url", async (t) => {
 
 test("delivers event to authenticated webhook url when env var is set", async (t) => {
   // add AUTHENTICATION env var for this test
-  process.env["AUTHORIZATION"] = "my-auth-key";
+  process.env.AUTHORIZATION = "my-auth-key";
 
   mock.method(
     global,
@@ -49,15 +47,13 @@ test("delivers event to authenticated webhook url when env var is set", async (t
     "fetch",
     (_input: RequestInfo, init: RequestInit): Promise<Response> => {
       t.assert(
-        init?.body === JSON.stringify(event),
+        init.body === JSON.stringify(event),
         "event was delivered to webhook"
       );
-      t.deepEqual(
-        init?.headers, {
-          "Content-Type": "application/json",
-          Authorization: "my-auth-key",
-        }
-      );
+      t.deepEqual(init.headers, {
+        "Content-Type": "application/json",
+        Authorization: "my-auth-key",
+      });
       return Promise.resolve({ ok: true, status: 200 } as Response);
     }
   );
