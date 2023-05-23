@@ -13,16 +13,24 @@ export const handler = async (event: TransactionProcessed) => {
     new GetObjectCommand({ Bucket: output.bucketName, Key: output.key })
   );
 
-  if (getFile.Body === undefined)
+  if (getFile.Body === undefined) {
     throw new Error("Failed to retrieve file from Bucket");
+  }
 
   const body = await getFile.Body.transformToString();
 
+  if (process.env.WEBHOOK_URL === undefined) {
+    throw new Error("WEBHOOK_URL is not defined");
+  }
+
   // send JSON to endpoint
-  const result = await fetch("https://example.com/webhook", {
+  const result = await fetch(process.env.WEBHOOK_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(process.env.AUTHORIZATION && {
+        Authorization: process.env.AUTHORIZATION,
+      }),
     },
     body,
   });

@@ -37,6 +37,7 @@
   "ava": {
     "environmentVariables": {
       "STEDI_FUNCTION_NAME": "function-under-test",
+      "WEBHOOK_URL": "https://www.company.com/test-webhook",
       "SLACK_URL": "https://hooks.slack.com/services/ABC123/DEF456/GHI789"
     },
     "typescript": {
