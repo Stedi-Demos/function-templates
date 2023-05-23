@@ -1,6 +1,6 @@
-import { FileFailed } from "../../shared/schemas/event-file-failed.js";
+import { type CoreFileFailedEvent } from "@stedi/integrations-sdk";
 
-export const handler = async (event: FileFailed) => {
+export const handler = async (event: CoreFileFailedEvent) => {
   const {
     detail: { input, errors },
   } = event;
