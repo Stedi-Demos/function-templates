@@ -1,10 +1,10 @@
 # Stedi Function Templates
 
-This repository holds the source code for functions that can be deployed using the Stedi Functions UI as templates.
+This repository holds the source code for functions that can be deployed as templates using the Stedi Functions UI.
 
-## Getting deployable code for use as samples.
+## Getting deployable code for use as samples
 
-The repo contains Typescript functions, so they must be compiled before using as templates.
+The repo contains TypeScript functions, which must be compiled before using them as templates.
 
 ```bash
 npx tsc
