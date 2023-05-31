@@ -73,14 +73,12 @@
 
 10. Add the [event binding](https://www.stedi.com/docs/core/consume-events-with-functions#subscribe-to-events) to link the `event-to-webhook` function to the `transaction.processed` events that are emitted by Core:
 
-    ```bash
-    a. Navigate to the [Functions UI](https://www.stedi.com/app/functions)
-    b. Select the link for the `event-to-webhook` function
-    c. Click the `Add Event Binding` button
-    d. Provide a name for the binding (for example: `all-processed-txns`)
-    e. Select the `transaction.processed` Detail Type
-    f. Click Done
-    ```
+    1. Navigate to the [Functions UI](https://www.stedi.com/app/functions)
+    2. Select the link for the `event-to-webhook` function
+    3. Click the `Add Event Binding` button
+    4. Provide a name for the binding (for example: `all-processed-txns`)
+    5. Select the `transaction.processed` Detail Type
+    6. Click Done
 
 You are done!
 
