@@ -24,7 +24,7 @@
     cd <PATH_TO_PROJECT_DIRECTORY>
     ```
 
-4. Install SDK project dependencies
+4. Install SDK project dependencies:
 
     ```bash
     npm install
