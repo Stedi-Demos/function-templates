@@ -16,4 +16,6 @@ You can list the available templates with:
 ls ./dist/functions/**/handler.js
 ```
 
-Be sure to remove the last line for the source map (helps with debugging / tests)
+## Deploying a function template
+
+Ready to deploy one of the templates? Check out the step-by-step [tutorial](./tutorial.md)!
