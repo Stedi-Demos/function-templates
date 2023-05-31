@@ -1,9 +1,9 @@
 # Deploying the event-to-webhook function
 
-1. Install the latest version of the [Stedi CLI](https://www.npmjs.com/package/@stedi/cli) (currently version 2.0.5):
+1. Install the latest version of the [Stedi CLI](https://www.npmjs.com/package/@stedi/cli) (`^2.0.5`):
 
     ```bash
-    npm install --global @stedi/cli
+    npm install --global @stedi/cli@latest
     ```
 
    If you've installed the CLI previously, be sure to update it to the latest version:
