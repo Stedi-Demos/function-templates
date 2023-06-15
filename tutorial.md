@@ -6,11 +6,7 @@
     npm install --global @stedi/cli@latest
     ```
 
-   If you've installed the CLI previously, be sure to update it to the latest version:
-
-    ```bash
-    npm update --global @stedi/cli
-    ```
+   If you've installed the CLI previously, be sure to update it to the latest version. The easiest way to do this is by running    the same installation command again.
 
 2. Use `stedi integrations init` CLI command to create and initialize a new Stedi Integrations SDK project (choose a path that does not exist yet -- it will be created):
 
