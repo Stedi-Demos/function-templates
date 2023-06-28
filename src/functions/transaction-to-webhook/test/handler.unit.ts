@@ -8,14 +8,17 @@ import { BucketsClient, GetObjectCommand } from "@stedi/sdk-client-buckets";
 import { Readable } from "node:stream";
 import { sdkStreamMixin } from "@aws-sdk/util-stream-node";
 import { mock } from "node:test";
+import { MapDocumentCommand, MappingsClient } from "@stedi/sdk-client-mappings";
 
 const event = sampleTransactionProcessedEvent();
 
 const sampleEDIAsJSON = { heading: { test: 1 } };
 const buckets = mockClient(BucketsClient);
+const mappings = mockClient(MappingsClient);
 
 test.afterEach(() => {
   buckets.reset();
+  mappings.reset();
   mock.reset();
 });
 
@@ -53,8 +56,10 @@ test.serial("delivers EDI as JSON to webhook url", async (t) => {
 
   // @ts-expect-error fetch is not yet present in @types/node
   const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
-
   t.assert(calls.length === 1, "JSON payload was delivered to webhook");
+
+  const invokeMappingCalls = mappings.commandCalls(MapDocumentCommand);
+  t.assert(invokeMappingCalls.length === 0);
 
   t.deepEqual(result, {
     ok: true,
@@ -63,7 +68,7 @@ test.serial("delivers EDI as JSON to webhook url", async (t) => {
 });
 
 test.serial(
-  "delivers EDI as JSON to authenticated webhook url when env var is set",
+  "delivers EDI as JSON to authenticated webhook url when AUTHORIZATION env var is set",
   async (t) => {
     // add AUTHENTICATION env var for this test
     process.env.AUTHORIZATION = "my-auth-key";
@@ -102,13 +107,85 @@ test.serial(
 
     // @ts-expect-error fetch is not yet present in @types/node
     const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
-
     t.assert(calls.length === 1, "JSON payload was delivered to webhook");
+
+    const invokeMappingCalls = mappings.commandCalls(MapDocumentCommand);
+    t.assert(invokeMappingCalls.length === 0);
 
     t.deepEqual(result, {
       ok: true,
       statusCode: 201,
     });
+
+    // remove AUTHENTICATION env var
+    delete process.env.AUTHORIZATION;
+  }
+);
+
+test.serial(
+  "delivers mapped output to webhook url when MAPPING_ID env var is set",
+  async (t) => {
+    // add MAPPING_ID env var for this test
+    process.env.MAPPING_ID = "mapping-id";
+
+    buckets
+      .on(GetObjectCommand, {
+        bucketName: event.detail.output.bucketName,
+        key: event.detail.output.key,
+      })
+      .resolvesOnce({
+        body: sdkStreamMixin(
+          Readable.from([
+            new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
+          ])
+        ),
+      });
+
+    const mockMappingResult = {
+      foo: "bar",
+    };
+
+    mappings
+      .on(MapDocumentCommand, {
+        id: "mapping-id",
+        content: JSON.stringify(sampleEDIAsJSON),
+      })
+      .resolvesOnce({
+        content: mockMappingResult,
+      });
+
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (_input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(
+          init.body === JSON.stringify(mockMappingResult),
+          "mapped JSON payload was delivered to webhook"
+        );
+        t.deepEqual(init.headers, {
+          "Content-Type": "application/json",
+        });
+        return Promise.resolve({ ok: true, status: 201 } as Response);
+      }
+    );
+
+    const result = await handler(event);
+
+    // @ts-expect-error fetch is not yet present in @types/node
+    const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
+    t.assert(calls.length === 1, "JSON payload was delivered to webhook");
+
+    const invokeMappingCalls = mappings.commandCalls(MapDocumentCommand);
+    t.assert(invokeMappingCalls.length === 1);
+
+    t.deepEqual(result, {
+      ok: true,
+      statusCode: 201,
+    });
+
+    // remove MAPPING_ID env var
+    delete process.env.MAPPING_ID;
   }
 );
 
