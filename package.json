@@ -13,7 +13,7 @@
   "devDependencies": {
     "@ava/typescript": "^4.0.0",
     "@aws-sdk/util-stream-node": "^3.360.0",
-    "@stedi/integrations-sdk": "^0.1.15",
+    "@stedi/integrations-sdk": "^0.1.16",
     "@stedi/sdk-client-as2": "^0.3.1",
     "@stedi/sdk-client-buckets": "^0.3.1",
     "@stedi/sdk-client-edi-translate": "^0.3.1",
