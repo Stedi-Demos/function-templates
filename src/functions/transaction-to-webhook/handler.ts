@@ -2,6 +2,7 @@ import { type CoreTransactionProcessedEvent } from "@stedi/integrations-sdk";
 import { bucketsClient, mappingsClient } from "@stedi/integrations-sdk/clients";
 import { GetObjectCommand } from "@stedi/sdk-client-buckets";
 import { MapDocumentCommand } from "@stedi/sdk-client-mappings";
+import { DocumentType } from "@aws-sdk/types";
 
 export const handler = async (event: CoreTransactionProcessedEvent) => {
   // fail fast if WEBHOOK_URL env var is not defined
@@ -24,11 +25,17 @@ export const handler = async (event: CoreTransactionProcessedEvent) => {
     throw new Error("Failed to retrieve file from Bucket");
   }
 
-  const body = await getFile.body.transformToString();
+  const bodyString = await getFile.body.transformToString();
+  let body: unknown;
+  try {
+    body = JSON.parse(bodyString);
+  } catch (e) {
+    throw new Error("File is not a JSON file");
+  }
 
   const webhookPayload =
     process.env.MAPPING_ID === undefined
-      ? body
+      ? bodyString
       : await invokeMapping(process.env.MAPPING_ID, body);
 
   // send JSON to endpoint
@@ -48,12 +55,12 @@ export const handler = async (event: CoreTransactionProcessedEvent) => {
 
 const invokeMapping = async (
   mappingId: string,
-  input: string
+  input: unknown
 ): Promise<string> => {
   const mappingResult = await mappingsClient().send(
     new MapDocumentCommand({
       id: mappingId,
-      content: input,
+      content: input as DocumentType,
     })
   );
 

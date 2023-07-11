@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@ava/typescript": "^4.0.0",
+    "@aws-sdk/types": "3.329.0",
     "@aws-sdk/util-stream-node": "3.329.0",
     "@stedi/integrations-sdk": "0.1.18",
     "@stedi/sdk-client-as2": "0.3.4",

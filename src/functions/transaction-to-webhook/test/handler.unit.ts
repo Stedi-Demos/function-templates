@@ -148,7 +148,7 @@ test.serial(
     mappings
       .on(MapDocumentCommand, {
         id: "mapping-id",
-        content: JSON.stringify(sampleEDIAsJSON),
+        content: sampleEDIAsJSON,
       })
       .resolvesOnce({
         content: mockMappingResult,
