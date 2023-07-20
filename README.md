@@ -47,7 +47,7 @@ To see the list of the available function templates, take a look at the [src/fun
     ```bash
     STEDI_API_KEY=<YOUR_STEDI_API_KEY>
 
-7. For each function template that you installed, complete any post-install instructions as documented in the `README.md` in the function's source directory. For example, the post-install instructions for the `event-to-webhook` function template can be found here: [src/functions/event-to-webhook/README.md#post-install-instructions]/src/functions/event-to-webhook/README.md#post-install-instructions)
+7. For each function template that you installed, complete any post-install instructions as documented in the `README.md` in the function's source directory. For example, the post-install instructions for the `event-to-webhook` function template can be found here: [src/functions/event-to-webhook/README.md#post-install-instructions](/src/functions/event-to-webhook/README.md#post-install-instructions)
 
 8. Deploy the function(s) to your Stedi account:
 
