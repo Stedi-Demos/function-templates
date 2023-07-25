@@ -6,7 +6,8 @@ import { DocumentType } from "@aws-sdk/types";
 
 export const handler = async (event: CoreTransactionProcessedEvent) => {
   // fail fast if WEBHOOK_URL env var is not defined
-  if (process.env.WEBHOOK_URL === undefined) {
+  const webhookUrl = process.env.WEBHOOK_URL;
+  if (!webhookUrl) {
     throw new Error("WEBHOOK_URL is not defined");
   }
 
@@ -39,7 +40,7 @@ export const handler = async (event: CoreTransactionProcessedEvent) => {
       : await invokeMapping(process.env.MAPPING_ID, body);
 
   // send JSON to endpoint
-  const result = await fetch(process.env.WEBHOOK_URL, {
+  const result = await fetch(webhookUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,6 +50,12 @@ export const handler = async (event: CoreTransactionProcessedEvent) => {
     },
     body: webhookPayload,
   });
+
+  if (!result.ok) {
+    throw new Error(
+      `delivery to ${webhookUrl} failed: ${result.statusText} (status code: ${result.status})`
+    );
+  }
 
   return { ok: result.ok, statusCode: result.status };
 };
