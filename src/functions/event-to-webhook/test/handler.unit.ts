@@ -70,3 +70,29 @@ test("delivers event to authenticated webhook url when env var is set", async (t
     statusCode: 200,
   });
 });
+
+test.serial(
+  "throws if webhook returns a non-successful response",
+  async (t) => {
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (_input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(
+          init.body === JSON.stringify(event),
+          "event was delivered to webhook"
+        );
+        t.deepEqual(init.headers, {
+          "Content-Type": "application/json",
+        });
+        return Promise.resolve({ ok: false, status: 422, statusText: "Unprocessable Entity" } as Response);
+      }
+    );
+
+    const error = await t.throwsAsync(handler(event));
+    const webhookUrl = process.env.WEBHOOK_URL;
+    t.assert(error?.message === `delivery to ${webhookUrl} failed: Unprocessable Entity (status code: 422)`);
+  }
+);
+

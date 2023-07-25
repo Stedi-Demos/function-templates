@@ -213,3 +213,41 @@ test.serial("throws if JSON file body is empty", async (t) => {
 
   t.assert(calls.length === 0, "webhook delivery not attempted for empty file");
 });
+
+test.serial(
+  "throws if webhook returns a non-successful response",
+  async (t) => {
+    buckets
+    .on(GetObjectCommand, {
+      bucketName: event.detail.output.bucketName,
+      key: event.detail.output.key,
+    })
+    .resolvesOnce({
+      body: sdkStreamMixin(
+        Readable.from([
+          new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
+        ])
+      ),
+    });
+
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (_input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(
+          init.body === JSON.stringify(sampleEDIAsJSON),
+          "JSON payload was delivered to webhook"
+        );
+        t.deepEqual(init.headers, {
+          "Content-Type": "application/json",
+        });
+        return Promise.resolve({ ok: false, status: 422, statusText: "Unprocessable Entity" } as Response);
+      }
+    );
+
+    const error = await t.throwsAsync(handler(event));
+    const webhookUrl = process.env.WEBHOOK_URL;
+    t.assert(error?.message === `delivery to ${webhookUrl} failed: Unprocessable Entity (status code: 422)`);
+  }
+);
