@@ -30,6 +30,9 @@ export const handler = async (event: unknown) => {
 const processInputEvent = async (
   event: GenerateEdiInputEvent,
 ): Promise<GenerateEdiInput> => {
+  // prepare `transactionGroups` input for use in GenerateEdi call:
+  // - if input includes a mappingId, invoke the mapping
+  // - if the (optionally mapped) input is not an array, wrap it in an array
   const transactionGroups = await Promise.all(
     event.transactionGroups.map(processTransactionGroupInput),
   );
@@ -59,7 +62,6 @@ const processTransactionGroupInput = async (
 
   return {
     transactionSettingId: transactionGroupInput.transactionSettingId,
-
     transactions,
   };
 };
