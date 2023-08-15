@@ -2,11 +2,10 @@ import test from "ava";
 import { handler } from "../handler.js";
 import {
   mockClient,
+  mockBucketStreamResponse,
   sampleTransactionProcessedEvent,
 } from "@stedi/integrations-sdk/testing";
 import { BucketsClient, GetObjectCommand } from "@stedi/sdk-client-buckets";
-import { Readable } from "node:stream";
-import { sdkStreamMixin } from "@aws-sdk/util-stream-node";
 import { mock } from "node:test";
 import { MapDocumentCommand, MappingsClient } from "@stedi/sdk-client-mappings";
 
@@ -24,17 +23,13 @@ test.afterEach(() => {
 
 test.serial("delivers EDI as JSON to webhook url", async (t) => {
   buckets
-    .on(GetObjectCommand, {
-      bucketName: event.detail.output.bucketName,
-      key: event.detail.output.key,
-    })
-    .resolvesOnce({
-      body: sdkStreamMixin(
-        Readable.from([
-          new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
-        ])
-      ),
-    });
+  .on(GetObjectCommand, {
+    bucketName: event.detail.output.bucketName,
+    key: event.detail.output.key,
+  })
+  .resolvesOnce({
+    body: mockBucketStreamResponse(),
+  });
 
   mock.method(
     global,
@@ -74,17 +69,13 @@ test.serial(
     process.env.AUTHORIZATION = "my-auth-key";
 
     buckets
-      .on(GetObjectCommand, {
-        bucketName: event.detail.output.bucketName,
-        key: event.detail.output.key,
-      })
-      .resolvesOnce({
-        body: sdkStreamMixin(
-          Readable.from([
-            new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
-          ])
-        ),
-      });
+    .on(GetObjectCommand, {
+      bucketName: event.detail.output.bucketName,
+      key: event.detail.output.key,
+    })
+    .resolvesOnce({
+      body: mockBucketStreamResponse(),
+    });
 
     mock.method(
       global,
@@ -129,30 +120,26 @@ test.serial(
     process.env.MAPPING_ID = "mapping-id";
 
     buckets
-      .on(GetObjectCommand, {
-        bucketName: event.detail.output.bucketName,
-        key: event.detail.output.key,
-      })
-      .resolvesOnce({
-        body: sdkStreamMixin(
-          Readable.from([
-            new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
-          ])
-        ),
-      });
+    .on(GetObjectCommand, {
+      bucketName: event.detail.output.bucketName,
+      key: event.detail.output.key,
+    })
+    .resolvesOnce({
+      body: mockBucketStreamResponse(),
+    });
 
     const mockMappingResult = {
       foo: "bar",
     };
 
     mappings
-      .on(MapDocumentCommand, {
-        id: "mapping-id",
-        content: sampleEDIAsJSON,
-      })
-      .resolvesOnce({
-        content: mockMappingResult,
-      });
+    .on(MapDocumentCommand, {
+      id: "mapping-id",
+      content: sampleEDIAsJSON,
+    })
+    .resolvesOnce({
+      content: mockMappingResult,
+    });
 
     mock.method(
       global,
@@ -191,13 +178,13 @@ test.serial(
 
 test.serial("throws if JSON file body is empty", async (t) => {
   buckets
-    .on(GetObjectCommand, {
-      bucketName: event.detail.output.bucketName,
-      key: event.detail.output.key,
-    })
-    .resolvesOnce({
-      body: undefined,
-    });
+  .on(GetObjectCommand, {
+    bucketName: event.detail.output.bucketName,
+    key: event.detail.output.key,
+  })
+  .resolvesOnce({
+    body: undefined,
+  });
 
   mock.method(
     global,
@@ -223,11 +210,7 @@ test.serial(
       key: event.detail.output.key,
     })
     .resolvesOnce({
-      body: sdkStreamMixin(
-        Readable.from([
-          new TextEncoder().encode(JSON.stringify(sampleEDIAsJSON)),
-        ])
-      ),
+      body: mockBucketStreamResponse(),
     });
 
     mock.method(
