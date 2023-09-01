@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/destination-webhook.json",
+  "type": "object",
+  "properties": {
+    "webhookUrl": {
+      "type": "string"
+    },
+    "authorization": {
+      "type": "string"
+    },
+    "mappingId": {
+      "type": "string"
+    },
+    "mapAsGuideJson": {
+      "type": "boolean",
+      "default": true
+    },
+    "mappingValidation": {
+      "type": "string",
+      "enum": ["strict"]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["webhookUrl"]
+}
