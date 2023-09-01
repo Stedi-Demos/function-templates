@@ -3,7 +3,7 @@ import { handler } from "../handler.js";
 import {
   mockClient,
   mockBucketStreamResponse,
-  sampleTransactionProcessedEvent,
+  sampleTransactionProcessedEvent
 } from "@stedi/integrations-sdk/testing";
 import { BucketsClient, GetObjectCommand } from "@stedi/sdk-client-buckets";
 import { mock } from "node:test";
@@ -21,14 +21,18 @@ test.afterEach(() => {
   mock.reset();
 });
 
+const authHeaderIfEnvVarSet = () => process.env.AUTHORIZATION
+  ? { "Authorization": process.env.AUTHORIZATION }
+  : {};
+
 test.serial("delivers EDI as JSON to webhook url", async (t) => {
   buckets
   .on(GetObjectCommand, {
     bucketName: event.detail.output.bucketName,
-    key: event.detail.output.key,
+    key: event.detail.output.key
   })
   .resolvesOnce({
-    body: mockBucketStreamResponse(),
+    body: mockBucketStreamResponse()
   });
 
   mock.method(
@@ -42,6 +46,7 @@ test.serial("delivers EDI as JSON to webhook url", async (t) => {
       );
       t.deepEqual(init.headers, {
         "Content-Type": "application/json",
+        ...authHeaderIfEnvVarSet(),
       });
       return Promise.resolve({ ok: true, status: 201 } as Response);
     }
@@ -58,23 +63,27 @@ test.serial("delivers EDI as JSON to webhook url", async (t) => {
 
   t.deepEqual(result, {
     ok: true,
-    statusCode: 201,
+    statusCode: 201
   });
 });
 
 test.serial(
-  "delivers EDI as JSON to authenticated webhook url when AUTHORIZATION env var is set",
+  "delivers EDI as JSON to webhook url when AUTHORIZATION env var is NOT set",
   async (t) => {
-    // add AUTHENTICATION env var for this test
-    process.env.AUTHORIZATION = "my-auth-key";
+    const existingAuthHeader = process.env.AUTHORIZATION;
+
+    // if already set, delete AUTHENTICATION env var for this test
+    if (existingAuthHeader) {
+      delete process.env.AUTHORIZATION;
+    }
 
     buckets
     .on(GetObjectCommand, {
       bucketName: event.detail.output.bucketName,
-      key: event.detail.output.key,
+      key: event.detail.output.key
     })
     .resolvesOnce({
-      body: mockBucketStreamResponse(),
+      body: mockBucketStreamResponse()
     });
 
     mock.method(
@@ -88,7 +97,6 @@ test.serial(
         );
         t.deepEqual(init.headers, {
           "Content-Type": "application/json",
-          Authorization: "my-auth-key",
         });
         return Promise.resolve({ ok: true, status: 201 } as Response);
       }
@@ -105,11 +113,70 @@ test.serial(
 
     t.deepEqual(result, {
       ok: true,
-      statusCode: 201,
+      statusCode: 201
     });
 
-    // remove AUTHENTICATION env var
-    delete process.env.AUTHORIZATION;
+    if (existingAuthHeader) {
+      // if it was already set, restore AUTHENTICATION env var
+      process.env.AUTHORIZATION = existingAuthHeader;
+    }
+  }
+);
+
+test.serial(
+  "delivers EDI as JSON to authenticated webhook url when AUTHORIZATION env var is set",
+  async (t) => {
+    const existingAuthHeader = process.env.AUTHORIZATION;
+
+    // if not already set, add AUTHENTICATION env var for this test
+    if (!existingAuthHeader) {
+      process.env.AUTHORIZATION = "my-auth-key";
+    }
+
+    buckets
+    .on(GetObjectCommand, {
+      bucketName: event.detail.output.bucketName,
+      key: event.detail.output.key
+    })
+    .resolvesOnce({
+      body: mockBucketStreamResponse()
+    });
+
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (_input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(
+          init.body === JSON.stringify(sampleEDIAsJSON),
+          "JSON payload was delivered to webhook"
+        );
+        t.deepEqual(init.headers, {
+          "Content-Type": "application/json",
+          Authorization: process.env.AUTHORIZATION,
+        });
+        return Promise.resolve({ ok: true, status: 201 } as Response);
+      }
+    );
+
+    const result = await handler(event);
+
+    // @ts-expect-error fetch is not yet present in @types/node
+    const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
+    t.assert(calls.length === 1, "JSON payload was delivered to webhook");
+
+    const invokeMappingCalls = mappings.commandCalls(MapDocumentCommand);
+    t.assert(invokeMappingCalls.length === 0);
+
+    t.deepEqual(result, {
+      ok: true,
+      statusCode: 201
+    });
+
+    if (!existingAuthHeader) {
+      // if it wasn't already set, remove AUTHENTICATION env var
+      delete process.env.AUTHORIZATION;
+    }
   }
 );
 
@@ -122,23 +189,23 @@ test.serial(
     buckets
     .on(GetObjectCommand, {
       bucketName: event.detail.output.bucketName,
-      key: event.detail.output.key,
+      key: event.detail.output.key
     })
     .resolvesOnce({
-      body: mockBucketStreamResponse(),
+      body: mockBucketStreamResponse()
     });
 
     const mockMappingResult = {
-      foo: "bar",
+      foo: "bar"
     };
 
     mappings
     .on(MapDocumentCommand, {
       id: "mapping-id",
-      content: sampleEDIAsJSON,
+      content: sampleEDIAsJSON
     })
     .resolvesOnce({
-      content: mockMappingResult,
+      content: mockMappingResult
     });
 
     mock.method(
@@ -152,6 +219,7 @@ test.serial(
         );
         t.deepEqual(init.headers, {
           "Content-Type": "application/json",
+          ...authHeaderIfEnvVarSet(),
         });
         return Promise.resolve({ ok: true, status: 201 } as Response);
       }
@@ -168,7 +236,7 @@ test.serial(
 
     t.deepEqual(result, {
       ok: true,
-      statusCode: 201,
+      statusCode: 201
     });
 
     // remove MAPPING_ID env var
@@ -180,10 +248,10 @@ test.serial("throws if JSON file body is empty", async (t) => {
   buckets
   .on(GetObjectCommand, {
     bucketName: event.detail.output.bucketName,
-    key: event.detail.output.key,
+    key: event.detail.output.key
   })
   .resolvesOnce({
-    body: undefined,
+    body: undefined
   });
 
   mock.method(
@@ -207,10 +275,10 @@ test.serial(
     buckets
     .on(GetObjectCommand, {
       bucketName: event.detail.output.bucketName,
-      key: event.detail.output.key,
+      key: event.detail.output.key
     })
     .resolvesOnce({
-      body: mockBucketStreamResponse(),
+      body: mockBucketStreamResponse()
     });
 
     mock.method(
@@ -224,6 +292,7 @@ test.serial(
         );
         t.deepEqual(init.headers, {
           "Content-Type": "application/json",
+          ...authHeaderIfEnvVarSet(),
         });
         return Promise.resolve({ ok: false, status: 422, statusText: "Unprocessable Entity" } as Response);
       }
