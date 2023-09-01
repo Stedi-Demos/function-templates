@@ -7,6 +7,10 @@ const event = sampleTransactionProcessedEvent();
 
 test.afterEach(() => mock.reset());
 
+const authHeaderIfEnvVarSet = () => process.env.AUTHORIZATION
+  ? { "Authorization": process.env.AUTHORIZATION }
+  : {};
+
 test("delivers event to webhook url", async (t) => {
   mock.method(
     global,
@@ -19,6 +23,7 @@ test("delivers event to webhook url", async (t) => {
       );
       t.deepEqual(init.headers, {
         "Content-Type": "application/json",
+        ...authHeaderIfEnvVarSet(),
       });
       return Promise.resolve({ ok: true, status: 200 } as Response);
     }
@@ -37,9 +42,13 @@ test("delivers event to webhook url", async (t) => {
   });
 });
 
-test("delivers event to authenticated webhook url when env var is set", async (t) => {
-  // add AUTHENTICATION env var for this test
-  process.env.AUTHORIZATION = "my-auth-key";
+test("delivers event to webhook url when env var is NOT set", async (t) => {
+  const existingAuthHeader = process.env.AUTHORIZATION;
+
+  // if already set, delete AUTHENTICATION env var for this test
+  if (existingAuthHeader) {
+    delete process.env.AUTHORIZATION;
+  }
 
   mock.method(
     global,
@@ -52,7 +61,6 @@ test("delivers event to authenticated webhook url when env var is set", async (t
       );
       t.deepEqual(init.headers, {
         "Content-Type": "application/json",
-        Authorization: "my-auth-key",
       });
       return Promise.resolve({ ok: true, status: 200 } as Response);
     }
@@ -69,6 +77,54 @@ test("delivers event to authenticated webhook url when env var is set", async (t
     ok: true,
     statusCode: 200,
   });
+
+  if (existingAuthHeader) {
+    // if it was already set, restore AUTHENTICATION env var
+    process.env.AUTHORIZATION = existingAuthHeader;
+  }
+});
+
+test("delivers event to authenticated webhook url when env var is set", async (t) => {
+  const existingAuthHeader = process.env.AUTHORIZATION;
+
+  // if not already set, add AUTHENTICATION env var for this test
+  if (!existingAuthHeader) {
+    process.env.AUTHORIZATION = "my-auth-key";
+  }
+
+  mock.method(
+    global,
+    // @ts-expect-error fetch is not yet present in @types/node
+    "fetch",
+    (_input: RequestInfo, init: RequestInit): Promise<Response> => {
+      t.assert(
+        init.body === JSON.stringify(event),
+        "event was delivered to webhook"
+      );
+      t.deepEqual(init.headers, {
+        "Content-Type": "application/json",
+        Authorization: process.env.AUTHORIZATION,
+      });
+      return Promise.resolve({ ok: true, status: 200 } as Response);
+    }
+  );
+
+  const result = await handler(event);
+
+  // @ts-expect-error fetch is not yet present in @types/node
+  const { calls } = (fetch as { mock: { calls: unknown[] } }).mock;
+
+  t.assert(calls.length === 1, "event was delivered to webhook");
+
+  t.deepEqual(result, {
+    ok: true,
+    statusCode: 200,
+  });
+
+  if (!existingAuthHeader) {
+    // if it wasn't already set, remove AUTHENTICATION env var
+    delete process.env.AUTHORIZATION;
+  }
 });
 
 test.serial(
@@ -85,6 +141,7 @@ test.serial(
         );
         t.deepEqual(init.headers, {
           "Content-Type": "application/json",
+          ...authHeaderIfEnvVarSet(),
         });
         return Promise.resolve({ ok: false, status: 422, statusText: "Unprocessable Entity" } as Response);
       }
