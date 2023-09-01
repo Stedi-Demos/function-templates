@@ -14,7 +14,7 @@
     "@ava/typescript": "^4.0.0",
     "@smithy/types": "1.2.0",
     "@smithy/util-stream-node": "2.0.3",
-    "@stedi/integrations-sdk": "0.1.23",
+    "@stedi/integrations-sdk": "0.1.26",
     "@stedi/sdk-client-as2": "0.4.23",
     "@stedi/sdk-client-buckets": "0.4.23",
     "@stedi/sdk-client-edi-translate": "0.4.23",
