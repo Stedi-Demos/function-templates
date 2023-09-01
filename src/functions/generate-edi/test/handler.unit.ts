@@ -9,7 +9,7 @@ import { ZodError } from "zod";
 const mappings = mockClient(MappingsClient);
 const partners = mockClient(PartnersClient);
 
-test.afterEach(() => {
+test.afterEach.always(() => {
   mappings.reset();
   partners.reset();
 });

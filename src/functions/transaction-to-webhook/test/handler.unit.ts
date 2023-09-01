@@ -15,7 +15,7 @@ const sampleEDIAsJSON = { heading: { test: 1 } };
 const buckets = mockClient(BucketsClient);
 const mappings = mockClient(MappingsClient);
 
-test.afterEach(() => {
+test.afterEach.always(() => {
   buckets.reset();
   mappings.reset();
   mock.reset();
