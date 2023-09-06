@@ -5,7 +5,7 @@ import { mock } from "node:test";
 
 const event = sampleTransactionProcessedEvent();
 
-test.afterEach(() => mock.reset());
+test.afterEach.always(() => mock.reset());
 
 const authHeaderIfEnvVarSet = () => process.env.AUTHORIZATION
   ? { "Authorization": process.env.AUTHORIZATION }
