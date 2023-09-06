@@ -98,22 +98,18 @@ export const handler = async (event: CoreTransactionProcessedV2Event) => {
 const extractOutputArtifactUrl = (
   event: CoreTransactionProcessedV2Event,
 ): string => {
-  const filteredOutputArtifacts = event.detail.artifacts.filter(
+  const [outputArtifact, ...unexpectedMatches] = event.detail.artifacts.filter(
     (artifact) => artifact.usage === "output",
   );
 
-  if (filteredOutputArtifacts.length !== 1) {
+  if (!outputArtifact || unexpectedMatches.length > 0) {
+    const actualCount = unexpectedMatches.length + (outputArtifact ? 1 : 0);
     throw new Error(
-      `Expected exactly 1 output artifact in event, received ${filteredOutputArtifacts.length}`,
+      `Expected exactly 1 output artifact in event, received ${actualCount}`,
     );
   }
 
-  const outputArtifactUrl = filteredOutputArtifacts[0]?.url;
-  if (!outputArtifactUrl) {
-    throw new Error("Unable to extract output artifact url from event");
-  }
-
-  return outputArtifactUrl;
+  return outputArtifact.url;
 };
 
 const loadDestinationConfig = async (

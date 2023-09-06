@@ -667,3 +667,115 @@ test.serial(
     t.assert(invokeMappingCalls.length === 0);
   },
 );
+
+test.serial(
+  "throws an error if input event has more than one `output` artifact",
+  async (t) => {
+    tokens.on(GetTokenForIAMCommand, {}).resolvesOnce({
+      id_token: testJwt,
+    });
+
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(input === sampleOutputArtifactUrl);
+        t.deepEqual(init.headers, {
+          Authorization: `Bearer ${testJwt}`,
+        });
+
+        return Promise.resolve({
+          ok: true,
+          text: async () => Promise.resolve("unused"),
+          json: async () => Promise.resolve(sampleEDIAsJSON),
+        } as Response);
+      },
+    );
+
+    const invalidEvent = { ...event };
+
+    // add a second `output` event to artifacts array
+    invalidEvent.detail.artifacts.push(        {
+      artifactType: "application/json",
+      usage: "output",
+      sizeBytes: 234,
+      url: sampleOutputArtifactUrl,
+    });
+
+    const error = await t.throwsAsync(handler(event));
+
+    const expectedErrorMessage = "Expected exactly 1 output artifact in event, received 2";
+    t.assert(error?.message === expectedErrorMessage);
+
+    const { calls } =
+      (
+        // @ts-expect-error fetch is not yet present in @types/node
+        fetch as {
+          mock: { calls: { arguments: string | { method: string }[] }[] };
+        }
+      ).mock;
+    t.assert(calls.length === 0, "no fetch calls are made");
+
+    const invokeMappingCalls = mappings.commandCalls(MapDocumentCommand);
+    t.assert(invokeMappingCalls.length === 0);
+  },
+);
+
+test.serial(
+  "throws an error if input event is missing `output` artifact",
+  async (t) => {
+    tokens.on(GetTokenForIAMCommand, {}).resolvesOnce({
+      id_token: testJwt,
+    });
+
+    mock.method(
+      global,
+      // @ts-expect-error fetch is not yet present in @types/node
+      "fetch",
+      (input: RequestInfo, init: RequestInit): Promise<Response> => {
+        t.assert(input === sampleOutputArtifactUrl);
+        t.deepEqual(init.headers, {
+          Authorization: `Bearer ${testJwt}`,
+        });
+
+        return Promise.resolve({
+          ok: true,
+          text: async () => Promise.resolve("unused"),
+          json: async () => Promise.resolve(sampleEDIAsJSON),
+        } as Response);
+      },
+    );
+
+    const invalidEvent = { ...event };
+
+    // override event artifacts array to only include input artifact
+    invalidEvent.detail.artifacts = [
+      {
+        artifactType: "application/edi-x12",
+        usage: "input",
+        sizeBytes: 123,
+        url: "someInputArtifactUrl",
+      }
+    ];
+
+    const error = await t.throwsAsync(handler(event));
+
+    console.log(`DEBUG: ${error?.message}`)
+
+    const expectedErrorMessage = "Expected exactly 1 output artifact in event, received 0";
+    t.assert(error?.message === expectedErrorMessage);
+
+    const { calls } =
+      (
+        // @ts-expect-error fetch is not yet present in @types/node
+        fetch as {
+          mock: { calls: { arguments: string | { method: string }[] }[] };
+        }
+      ).mock;
+    t.assert(calls.length === 0, "no fetch calls are made");
+
+    const invokeMappingCalls = mappings.commandCalls(MapDocumentCommand);
+    t.assert(invokeMappingCalls.length === 0);
+  },
+);
