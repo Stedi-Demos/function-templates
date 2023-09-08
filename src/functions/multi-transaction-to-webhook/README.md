@@ -57,6 +57,6 @@ The JSON schema for the webhook configuration entries stored in Stash can be fou
     2. Select the link for the `multi-transaction-to-webhook` function
     3. Click the `Add Event Binding` button
     4. Provide a name for the binding (for example: `all-processed-txns`)
-    5. Select the `transaction.processed.v3` Detail Type
+    5. Select the `transaction.processed.v2` Detail Type
     6. Select the `INBOUND` Direction
     7. Click Done
