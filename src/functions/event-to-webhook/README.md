@@ -41,7 +41,7 @@ Sends a POST http request with the contents of the input event to the configured
 
    _Note_: if you do not have a webhook available to use, you can use a webhook testing service like [webhook.site](https://webhook.site).
 
-4. Deploy the function as shown in [step 8 of the function template deployment instructions](/README.md#deploying-function-templates)
+4. Deploy the function as shown in [step 7 of the function template deployment instructions](/README.md#deploying-function-templates)
 
 ### Post-deployment instructions
 
