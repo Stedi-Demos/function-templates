@@ -3,6 +3,9 @@
   "$id": "schemas/destination-webhook.json",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "webhookUrl": {
       "type": "string"
     },
