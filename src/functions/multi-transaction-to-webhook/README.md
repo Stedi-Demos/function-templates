@@ -40,7 +40,7 @@ The JSON schema for the webhook configuration entries stored in Stash can be fou
    8. The value must conform to the JSON schema mentioned above (`webhookUrl` is required, and all other attributes are optional). For example:
       ```json
       {
-         "$schema": "https://github.com/Stedi-Demos/function-templates/blob/main/src/functions/multi-transaction-to-webhook/schema/destination-config.json",
+         "$schema": "https://raw.githubusercontent.com/Stedi-Demos/function-templates/main/src/functions/multi-transaction-to-webhook/schema/destination-config.json",
          "webhookUrl": "https://webhook.site/<YOUR_WEBHOOK_UUID>"
       }
       ```
