@@ -61,4 +61,4 @@ To see the list of the available function templates, take a look at the [src/fun
     npm run deploy
     ```
 
-8. For each function template that you installed, complete any post-deployment instructions as documented in the `README.md` in the function's source directory. For example, the post-deployment instructions for the `event-to-webhook` function template can be found here: [src/functions/event-to-webhook/README.md#post-install-instructions](/src/functions/event-to-webhook/README.md#post-deployment-instructions)
+8. For each function template that you installed, complete any post-deployment instructions as documented in the `README.md` in the function's source directory. For example, the post-deployment instructions for the `event-to-webhook` function template can be found here: [src/functions/event-to-webhook/README.md#post-deployment-instructions](/src/functions/event-to-webhook/README.md#post-deployment-instructions)

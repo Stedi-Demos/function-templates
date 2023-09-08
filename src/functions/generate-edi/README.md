@@ -16,7 +16,7 @@ N/A
     npm run test
     ```
 
-2. Deploy the function as shown in [step 8 of the function template deployment instructions](/README.md#deploying-function-templates)
+2. Deploy the function as shown in [step 7 of the function template deployment instructions](/README.md#deploying-function-templates)
 
 ### Post-deployment instructions
 

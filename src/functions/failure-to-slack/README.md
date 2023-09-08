@@ -36,7 +36,7 @@ Sends details from `file.failed` events to a Slack webhook.
     SLACK_URL=<YOUR_SLACK_WEBHOOK_URL>
     ```
 
-4. Deploy the function as shown in [step 8 of the function template deployment instructions](/README.md#deploying-function-templates)
+4. Deploy the function as shown in [step 7 of the function template deployment instructions](/README.md#deploying-function-templates)
 
 ### Post-deployment instructions
 
