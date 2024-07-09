@@ -1,28 +1,74 @@
-import {
-  mappingsClient,
-  partnersClient,
-} from "@stedi/integrations-sdk/clients";
+import { mappingsClient } from "@stedi/integrations-sdk/clients";
 import { MapDocumentCommand } from "@stedi/sdk-client-mappings";
 import {
   GenerateEdiInputEvent,
   GenerateEdiInputEventSchema,
   TransactionGroupInput,
 } from "./GenerateEdiInputEvent.js";
-import {
-  GenerateEdiCommand,
-  GenerateEdiInput,
-  TransactionGroup,
-} from "@stedi/sdk-client-partners";
-import { DocumentType } from "@aws-sdk/types";
+import { DocumentType } from "@smithy/types";
+import { resolveToken } from "@stedi/sdk-token-provider-aws-identity";
 
+declare const X12UsageIndicator: {
+  readonly INFORMATION: "I";
+  readonly PRODUCTION: "P";
+  readonly TEST: "T";
+};
+
+type X12UsageIndicator =
+  (typeof X12UsageIndicator)[keyof typeof X12UsageIndicator];
+interface TransactionGroup {
+  transactionSettingId: string;
+  transactions: DocumentType[];
+}
+
+interface GenerateEdiInput {
+  partnershipId: string;
+  transactionGroups: TransactionGroup[];
+  interchangeUsageIndicatorOverride?: X12UsageIndicator | string;
+  filename?: string;
+}
+
+const BASE_CORE_API_URL = "https://core.us.stedi.com/2023-08-01";
 export const handler = async (event: unknown) => {
   const generateEdiInputEvent = GenerateEdiInputEventSchema.parse(event);
   const generateEdiInput = await processInputEvent(generateEdiInputEvent);
 
-  const result = await partnersClient().send(
-    new GenerateEdiCommand(generateEdiInput),
-  );
+  const generateEdiUrl = `${BASE_CORE_API_URL}/x12/partnerships/${generateEdiInput.partnershipId}/generate-edi`;
+  const overrides = generateEdiInput.interchangeUsageIndicatorOverride
+    ? {
+        interchangeUsageIndicator:
+          generateEdiInput.interchangeUsageIndicatorOverride,
+      }
+    : undefined;
+  const generateEdiPayload = {
+    filename: generateEdiInput.filename,
+    overrides,
+    transactionGroups: generateEdiInput.transactionGroups,
+  };
 
+  const { token } = await resolveToken();
+  const fetchResponse = await fetch(generateEdiUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(generateEdiPayload),
+  });
+
+  if (!fetchResponse.ok) {
+    const responseSummary = {
+      status: fetchResponse.status,
+      statusText: fetchResponse.statusText,
+      body: await fetchResponse.text(),
+    };
+
+    throw new Error(
+      `Failed to generate EDI: ${JSON.stringify(responseSummary, null, 2)}`,
+    );
+  }
+
+  const result = await fetchResponse.json();
   console.log(JSON.stringify(result, null, 2));
   return result;
 };
