@@ -7,6 +7,8 @@ import {
 } from "./GenerateEdiInputEvent.js";
 import { DocumentType } from "@smithy/types";
 import { resolveToken } from "@stedi/sdk-token-provider-aws-identity";
+import pRetry from "p-retry";
+import { RequestInit, Response } from "undici/types/fetch.js";
 
 declare const X12UsageIndicator: {
   readonly INFORMATION: "I";
@@ -47,7 +49,7 @@ export const handler = async (event: unknown) => {
   };
 
   const { token } = await resolveToken();
-  const fetchResponse = await fetch(generateEdiUrl, {
+  const fetchResponse = await fetchWithRetries(generateEdiUrl, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -130,4 +132,35 @@ const invokeMapping = async (
   }
 
   return mappingResult.content;
+};
+
+const fetchWithRetries = async (
+  url: string,
+  requestInit: RequestInit,
+): Promise<Response> => {
+  return await pRetry(
+    async () => {
+      const response = await fetch(url, requestInit);
+
+      // a 400 response from the generate-edi endpoint indicates a validation error, don't retry those
+      if (!response.ok && response.status !== 400) {
+        throw new Error(
+          `Failed to generate edi: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      return response;
+    },
+    {
+      retries: 2,
+      minTimeout: 500,
+      maxTimeout: 2500,
+      onFailedAttempt: (error) => {
+        console.log(error.message);
+        console.log(
+          `fetch attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`,
+        );
+      },
+    },
+  );
 };
